@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+ <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+   integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+   crossorigin=""/>
+   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+   integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+   crossorigin=""></script>
+   <style type="text/css">
+   		#mapid { height: 600px; }
+   </style>
+   <script type="text/javascript" src="spain.js"></script>
+   <script type="text/javascript" src="germany.js"></script>
+   <script type="text/javascript" src="argentina.js"></script>
+   <script type="text/javascript" src="continents.js"></script>
+   <script type="text/javascript" src="limits_IT_regions.geojson.js"></script>
+   <script type="text/javascript">
+		function extract(data, region){
+			var result = data.features.filter(a => a.properties.reg_name == region)[0].geometry.coordinates[0][0];
+			return result;
+		};
+
+		function transpose(data){
+			return  data.map(a => [a[1], a[0]]);
+		}
+
+		function extractContinent(data, name){
+			return data.features
+				.filter(a => a.properties.CONTINENT === name)[0]
+				.geometry
+				.coordinates
+				// the regions are seemingly in a random order, so let's sort them by number of vertices
+				.sort((a, b) => b[0].length - a[0].length)[0][0];
+		}
+   </script>
+<head>
+	<title>Geo</title>
+</head>
+<body>
+    <div id="mapid"></div>
+    <script type="text/javascript">
+   	   	var mymap = L.map('mapid').setView([41.89332199, 12.48293209], 2);
+   	   	L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		    maxZoom: 18,
+    		id: 'mapbox/streets-v11',
+    		tileSize: 512,
+    		zoomOffset: -1
+		}).addTo(mymap);
+		// https://ec.europa.eu/eurostat/web/gisco/geodata/reference-data/administrative-units-statistical-units/countries
+		var region = transpose(extract(geo, 'Calabria'));
+		var southAmerica = transpose(extractContinent(continents, 'South America'));
+		var polygon1 = L.polygon(spain).addTo(mymap);
+		var polygon2 = L.polygon(germany).addTo(mymap);
+		var polygon3 = L.polygon(argentina).addTo(mymap);
+		var polygon4 = L.polygon(southAmerica).addTo(mymap);
+    </script>
+</body>
+</html>
